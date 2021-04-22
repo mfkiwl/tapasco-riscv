@@ -1,9 +1,15 @@
 ipx::package_project -root_dir IP/$project_name -module $project_name -generated_files -import_files -force
 
 # Set platform compatibility
-set_property supported_families {virtex7 Beta qvirtex7 Beta kintex7 Beta kintex7l Beta qkintex7 Beta qkintex7l Beta artix7 Beta artix7l Beta aartix7 Beta qartix7 Beta zynq Beta qzynq Beta azynq Beta spartan7 Beta aspartan7 Beta virtexu Beta virtexuplus Beta kintexuplus Beta zynquplus Beta kintexu Beta} [ipx::current_core]
+set_property supported_families {virtex7 Beta qvirtex7 Beta kintex7 Beta kintex7l Beta qkintex7 Beta qkintex7l Beta artix7 Beta artix7l Beta aartix7 Beta qartix7 Beta zynq Beta qzynq Beta azynq Beta spartan7 Beta aspartan7 Beta virtexu Beta virtexuplus Beta virtexuplusHBM Beta kintexuplus Beta zynquplus Beta kintexu Beta} [ipx::current_core]
 
 set core [ipx::current_core]
+
+# Remove SystemC simulation sources
+set sim_fg [ipx::get_file_groups xilinx_anylanguagebehavioralsimulation]
+foreach file [ipx::get_files -type systemCSource -of_objects $sim_fg] {
+	ipx::remove_file [get_property NAME $file] -file_group $sim_fg
+}
 
 # Basic information
 set_property vendor esa.informatik.tu-darmstadt.de $core
