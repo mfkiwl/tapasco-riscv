@@ -1,24 +1,26 @@
-puts "package WDC's SweRV"
+puts "package  OpenHW Group's CVA6"
 
-set name swerv_eh1
+set name cva6_dm
 set version 0.1
 create_project -in_memory
 
-add_files [glob swerv_eh1/design/**.{v,sv,h}]
-add_files [glob swerv_eh1/design/*/*.{v,sv,h}]
-add_files [glob swerv_eh1/configs/snapshots/default/*.{sv,vh}]
-set_property file_type {Verilog Header} [get_files swerv_eh1/configs/snapshots/default/pic_ctrl_verilator_unroll.sv]
+#add_files [glob dm_top.sv]
+add_files [exec cat ../dm_core.files]
+#add_files [exec find src/ -type f -name "*.sv"]
+#add_files [glob includes/*.{v,sv,h,svh}]
+#set_property file_type {Verilog Header} [get_files *.svh]
+set_property include_dirs {"include" "src/common_cells/include"} [current_fileset]
 
 # optionally remove unneeded files
 
 update_compile_order -fileset sources_1
-set_property top swerv_wrapper_verilog [current_fileset]
+set_property top tapasco_dm_top [current_fileset]
 update_compile_order -fileset sources_1
 
-ipx::package_project -root_dir [pwd]/swerv_eh1 -import_files -force
+ipx::package_project -root_dir [pwd] -import_files -force
 set core [ipx::current_core]
-set_property vendor wdc $core
-set_property library swerv $core
+set_property vendor openhwgroup $core
+set_property library cva6 $core
 set_property name $name $core
 set_property display_name $name $core
 set_property description $name $core
@@ -40,24 +42,21 @@ if 0 {
     set_property abstraction_type_vlnv esa.informatik.tu-darmstadt.de:user:DMI_rtl:1.0 [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]
     set_property bus_type_vlnv esa.informatik.tu-darmstadt.de:user:DMI:1.0 [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]
     ipx::add_port_map RSP_DATA [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]
-    set_property physical_name dmi_reg_rdata [ipx::get_port_maps RSP_DATA -of_objects [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]]
+    set_property physical_name dmi_rdata [ipx::get_port_maps RSP_DATA -of_objects [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]]
     ipx::add_port_map REQ_DATA [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]
-    set_property physical_name dmi_reg_wdata [ipx::get_port_maps REQ_DATA -of_objects [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]]
+    set_property physical_name dmi_wdata [ipx::get_port_maps REQ_DATA -of_objects [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]]
     ipx::add_port_map REQ_ADDRESS [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]
-    set_property physical_name dmi_reg_addr [ipx::get_port_maps REQ_ADDRESS -of_objects [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]]
+    set_property physical_name dmi_addr [ipx::get_port_maps REQ_ADDRESS -of_objects [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]]
     ipx::add_port_map REQ_WRITE [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]
-    set_property physical_name dmi_reg_wr_en [ipx::get_port_maps REQ_WRITE -of_objects [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]]
+    set_property physical_name dmi_wr [ipx::get_port_maps REQ_WRITE -of_objects [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]]
     ipx::add_port_map REQ_ACCESS [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]
-    set_property physical_name dmi_reg_en [ipx::get_port_maps REQ_ACCESS -of_objects [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]]
+    set_property physical_name dmi_req [ipx::get_port_maps REQ_ACCESS -of_objects [ipx::get_bus_interfaces DMI -of_objects [ipx::current_core]]]
 }
-
-# change pin type to interrupt
-ipx::infer_bus_interface timer_int xilinx.com:signal:interrupt_rtl:1.0 [ipx::current_core]
 
 ipx::create_xgui_files $core
 ipx::update_checksums $core
 ipx::save_core $core
 ipx::check_integrity $core
 
-ipx::archive_core wdc_risc-v_$name.zip $core
+ipx::archive_core risc-v_$name.zip $core
 ipx::unload_core component_1
